@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -56,7 +56,7 @@ const steps = [
   },
 ] as const;
 
-export default function DemandWaitlistPage() {
+function DemandWaitlistForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const referrerId = searchParams.get("r") ?? undefined;
@@ -439,6 +439,14 @@ function logAnalyticsEvent(eventType: string, payload: Record<string, unknown>) 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ event_type: eventType, payload }),
   }).catch((error) => console.error("Analytics error", error));
+}
+
+export default function DemandWaitlistPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>}>
+      <DemandWaitlistForm />
+    </Suspense>
+  );
 }
 
 console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
