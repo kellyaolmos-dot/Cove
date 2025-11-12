@@ -18,47 +18,41 @@ export default function Waitlist() {
   };
 
   return (
-    <section id="waitlist" className="py-20 bg-gradient-to-r from-blue-600 to-cyan-600">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {/* Section Header */}
-        <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-          Ready to Find Your Perfect Place?
-        </h2>
-        <p className="text-xl text-blue-100 mb-8">
-          Join our waitlist and be the first to experience stress-free housing
-        </p>
+    <section className="py-16 px-4 border-b border-gray-200">
+      <div className="max-w-xl mx-auto space-y-6 text-center">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Collect interest here
+          </h2>
+          <p className="text-sm text-gray-600">
+            Use any email tool you like. Replace this copy with a value prop when
+            you have it.
+          </p>
+        </div>
 
-        {/* Waitlist Form */}
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              className="flex-1 px-6 py-4 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
-            />
-            <button
-              type="submit"
-              className="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors whitespace-nowrap"
-            >
-              Join Waitlist
-            </button>
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email address"
+            required
+            className="w-full border border-gray-300 rounded-md px-4 py-3 text-gray-900"
+          />
+          <button
+            type="submit"
+            className="w-full border border-gray-900 text-gray-900 px-4 py-3 rounded-md font-medium"
+          >
+            Join waitlist
+          </button>
         </form>
 
-        {/* Success Message */}
         {submitted && (
-          <div className="mt-4 text-white font-semibold animate-fade-in">
-            Thanks for joining! We'll be in touch soon.
+          <div className="text-sm text-gray-600" role="status">
+            Thanks for the nudge — feel free to swap in your own confirmation
+            microcopy.
           </div>
         )}
-
-        {/* Social Proof */}
-        <p className="mt-8 text-blue-100">
-          Join 1,000+ students already on the waitlist
-        </p>
       </div>
     </section>
   );
