@@ -28,26 +28,40 @@ type EmailDeliveryPayload = {
 
 async function deliverEmail({ email, subject, html, from }: EmailDeliveryPayload) {
   if (resendClient) {
-    await resendClient.emails.send({
-      from: from ?? defaultFromAddress,
-      to: email,
-      subject,
-      html,
-    });
-    return;
+    console.log(`📧 Sending email via Resend to ${email}`);
+    try {
+      const result = await resendClient.emails.send({
+        from: from ?? defaultFromAddress,
+        to: email,
+        subject,
+        html,
+      });
+      console.log(`✅ Email sent successfully via Resend:`, result);
+      return;
+    } catch (error) {
+      console.error(`❌ Resend error:`, error);
+      throw error;
+    }
   }
 
   if (gmailTransport) {
-    await gmailTransport.sendMail({
-      from: from ?? defaultFromAddress,
-      to: email,
-      subject,
-      html,
-    });
-    return;
+    console.log(`📧 Sending email via Gmail to ${email}`);
+    try {
+      const result = await gmailTransport.sendMail({
+        from: from ?? defaultFromAddress,
+        to: email,
+        subject,
+        html,
+      });
+      console.log(`✅ Email sent successfully via Gmail:`, result);
+      return;
+    } catch (error) {
+      console.error(`❌ Gmail error:`, error);
+      throw error;
+    }
   }
 
-  console.warn("No email provider configured. Set RESEND_API_KEY or Gmail credentials to send emails.");
+  console.warn("⚠️ No email provider configured. Set RESEND_API_KEY or Gmail credentials to send emails.");
 }
 
 type WaitlistEmailPayload = {

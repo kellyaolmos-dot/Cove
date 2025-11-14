@@ -49,12 +49,18 @@ export async function POST(request: Request) {
     const referralLink = `${process.env.NEXT_PUBLIC_BASE_URL}/waitlist/supply?r=${parsed.waitlist_id}`;
 
     // Send approval email with referral link
-    await sendApprovalEmail({
-      email: waitlistEntry.email,
-      name: waitlistEntry.name || "there",
-      referralLink,
-      type: "supply",
-    });
+    try {
+      await sendApprovalEmail({
+        email: waitlistEntry.email,
+        name: waitlistEntry.name || "there",
+        referralLink,
+        type: "supply",
+      });
+      console.log(`✅ Approval email sent to ${waitlistEntry.email}`);
+    } catch (emailError) {
+      console.error("❌ Failed to send approval email:", emailError);
+      // Don't fail the approval if email fails
+    }
 
     return NextResponse.json({ ok: true, referralLink });
   } catch (error) {

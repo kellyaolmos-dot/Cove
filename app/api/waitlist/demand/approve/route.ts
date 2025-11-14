@@ -14,9 +14,17 @@ export async function POST(request: Request) {
     const parsed = approveSchema.parse(body);
 
     // Verify admin key (you should set this in your environment variables)
+    console.log("🔑 Checking admin key...");
+    console.log("Received key:", parsed.admin_key);
+    console.log("Expected key:", process.env.ADMIN_KEY);
+    console.log("Keys match:", parsed.admin_key === process.env.ADMIN_KEY);
+
     if (parsed.admin_key !== process.env.ADMIN_KEY) {
+      console.error("❌ Admin key mismatch!");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    console.log("✅ Admin key verified");
 
     const supabase = createSupabaseAdminClient();
 
@@ -50,12 +58,19 @@ export async function POST(request: Request) {
     const referralLink = `${process.env.NEXT_PUBLIC_BASE_URL}/waitlist/demand?r=${parsed.waitlist_id}`;
 
     // Send approval email with referral link
-    await sendApprovalEmail({
-      email: waitlistEntry.email,
-      name: waitlistEntry.name,
-      referralLink,
-      cities: waitlistEntry.target_cities,
-    });
+    try {
+      await sendApprovalEmail({
+        email: waitlistEntry.email,
+        name: waitlistEntry.name,
+        referralLink,
+        cities: waitlistEntry.target_cities,
+        type: "demand",
+      });
+      console.log(`✅ Approval email sent to ${waitlistEntry.email}`);
+    } catch (emailError) {
+      console.error("❌ Failed to send approval email:", emailError);
+      // Don't fail the approval if email fails
+    }
 
     // Log event
     await supabase.from("waitlist_events").insert({
