@@ -119,26 +119,26 @@ export default function ListingsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-6">
-          <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="max-w-2xl space-y-2 text-left">
-              <h1 className="text-3xl font-bold text-gray-900">
+        <div className="container mx-auto px-4 py-4 lg:py-6">
+          <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-4 lg:gap-6">
+            <div className="max-w-2xl space-y-1 lg:space-y-2 text-center md:text-left mx-auto md:mx-0">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
                 Find Your Perfect Home
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm lg:text-base text-gray-600">
                 Swipe through verified listings in top cities
               </p>
             </div>
-            <div className="flex flex-wrap justify-start md:justify-end gap-3 w-full md:w-auto">
+            <div className="flex flex-row justify-center md:justify-end gap-2 lg:gap-3 w-full md:w-auto">
               <button
                 onClick={handleViewLikes}
-                className="px-6 py-2 border border-gray-900 text-gray-900 rounded-md text-sm font-medium hover:bg-gray-50"
+                className="px-4 lg:px-6 py-2 border border-gray-900 text-gray-900 rounded-md text-sm font-medium hover:bg-gray-50 flex-1 sm:flex-none"
               >
                 View Likes
               </button>
               <button
                 onClick={handleCreateListing}
-                className="px-6 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800"
+                className="px-4 lg:px-6 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 flex-1 sm:flex-none"
               >
                 Create Listing
               </button>
@@ -148,12 +148,12 @@ export default function ListingsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column - Filters and Map (Desktop) */}
-          <div className="lg:col-span-5 order-1 space-y-6">
+      <div className="container mx-auto px-4 py-4 lg:py-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-8">
+          {/* Left Column - Filters and Map */}
+          <div className="lg:col-span-5 order-1 space-y-4 lg:space-y-6">
             {/* Filters */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 lg:p-6">
               <FilterBar
                 selectedCity={selectedCity}
                 onCityChange={setSelectedCity}
@@ -167,16 +167,16 @@ export default function ListingsPage() {
             </div>
 
             {/* Listings Count */}
-            <div className="text-left">
+            <div className="text-left px-1">
               <p className="text-sm text-gray-600">
                 <span className="font-semibold">{remainingCount}</span> listing
                 {remainingCount !== 1 ? "s" : ""} available
               </p>
             </div>
 
-            {/* Map - Stacked below filters on mobile, below filters on desktop */}
+            {/* Map */}
             <div className="lg:sticky lg:top-8">
-              <div className="h-[400px] lg:h-[600px] rounded-2xl overflow-hidden border border-gray-200">
+              <div className="h-[280px] lg:h-[600px] rounded-2xl overflow-hidden border border-gray-200">
                 <ListingMap
                   listings={filteredListings}
                   selectedCity={selectedCity}
@@ -191,7 +191,7 @@ export default function ListingsPage() {
           <div className="lg:col-span-7 order-2">
 
             {/* Card Stack */}
-            <div className="relative flex justify-center items-start min-h-[900px]">
+            <div className="relative flex justify-center items-start w-full min-h-[500px] lg:min-h-[900px]">
               {filteredListings.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-gray-600 mb-4">
