@@ -15,6 +15,8 @@ type DemandEntry = {
   company?: string;
   sector?: string;
   housing_search_type: string;
+  roommate_preferences?: string[];
+  other_roommate_preference?: string;
   budget: string;
   concerns: string[];
   approval_status: string;
@@ -370,6 +372,19 @@ export default function AdminWaitlistPage() {
                     {selectedDemand.housing_search_type.replace("_", " ")}
                   </p>
                 </div>
+                {selectedDemand.roommate_preferences && selectedDemand.roommate_preferences.length > 0 && (
+                  <div>
+                    <p className="font-medium text-gray-700">Roommate Preferences</p>
+                    <ul className="list-disc list-inside">
+                      {selectedDemand.roommate_preferences.map((pref, i) => (
+                        <li key={i}>{pref}</li>
+                      ))}
+                    </ul>
+                    {selectedDemand.other_roommate_preference && (
+                      <p className="mt-1 text-gray-600 italic">{selectedDemand.other_roommate_preference}</p>
+                    )}
+                  </div>
+                )}
                 <div>
                   <p className="font-medium text-gray-700">Budget</p>
                   <p>{selectedDemand.budget}</p>

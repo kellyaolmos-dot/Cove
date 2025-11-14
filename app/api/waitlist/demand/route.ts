@@ -46,6 +46,11 @@ const demandPayloadSchema = z.object({
     .optional()
     .transform((val) => (val?.trim() ? val.trim() : undefined)),
   housing_search_type: z.enum(["solo", "with_roommates"]),
+  roommate_preferences: z.array(z.string()).optional(),
+  other_roommate_preference: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
   budget: z.string().min(1),
   concerns: z.array(z.string()).min(1),
   other_concern: z
@@ -83,6 +88,8 @@ export async function POST(request: Request) {
           company: parsed.company,
           sector: parsed.sector,
           housing_search_type: parsed.housing_search_type,
+          roommate_preferences: parsed.roommate_preferences ?? null,
+          other_roommate_preference: parsed.other_roommate_preference,
           budget: parsed.budget,
           concerns: parsed.concerns,
           other_concern: parsed.other_concern,

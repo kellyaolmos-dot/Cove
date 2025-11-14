@@ -13,6 +13,18 @@ const statusOptions = ["confirmed", "recruiting", "exploring"] as const;
 const contactOptions = ["email", "text"] as const;
 const housingSearchOptions = ["solo", "with_roommates"] as const;
 const sectorOptions = ["Tech", "Finance", "Consulting", "Healthcare", "Law", "Media", "Non-profit", "Government", "Startup", "Other"];
+const roommatePreferenceOptions = [
+  "Similar schedule/work hours",
+  "Shared interests or hobbies",
+  "Clean and organized",
+  "Social and outgoing",
+  "Quiet and respectful",
+  "Same gender",
+  "Similar age",
+  "Non-smoker",
+  "Pet-friendly",
+  "Other"
+];
 const concernOptions = [
   "Finding affordable housing",
   "Finding roommates",
@@ -41,6 +53,8 @@ const demandFormSchema = z.object({
   company: z.string().max(120).optional().or(z.literal("")),
   sector: z.string().optional().or(z.literal("")),
   housing_search_type: z.enum(housingSearchOptions),
+  roommate_preferences: z.array(z.string()).optional(),
+  other_roommate_preference: z.string().optional().or(z.literal("")),
   budget: z.string().min(1, "Budget is required."),
   concerns: z.array(z.string()).min(1, "Select at least one concern."),
   other_concern: z.string().optional().or(z.literal("")),
@@ -65,7 +79,7 @@ const steps = [
   {
     id: 2,
     title: "Housing preferences",
-    fields: ["housing_search_type", "budget", "concerns", "other_concern"] as const,
+    fields: ["housing_search_type", "roommate_preferences", "other_roommate_preference", "budget", "concerns", "other_concern"] as const,
   },
   {
     id: 3,
@@ -92,6 +106,7 @@ function DemandWaitlistForm() {
       target_cities: [],
       move_in_month: "Not sure yet",
       housing_search_type: "with_roommates",
+      roommate_preferences: [],
       budget: "",
       concerns: [],
       contact_pref: ["email"],
@@ -388,6 +403,39 @@ function DemandWaitlistForm() {
                     </div>
                     <ErrorMessage message={form.formState.errors.housing_search_type?.message} />
                   </Fieldset>
+
+                  {form.watch("housing_search_type") === "with_roommates" && (
+                    <Fieldset label="What do you look for in roommates? (select all that apply)">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {roommatePreferenceOptions.map((preference) => (
+                          <label
+                            key={preference}
+                            className={`flex items-center gap-3 border rounded-md px-4 py-3 text-sm ${
+                              form.watch("roommate_preferences")?.includes(preference)
+                                ? "border-gray-900"
+                                : "border-gray-200"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              value={preference}
+                              {...form.register("roommate_preferences")}
+                            />
+                            <span>{preference}</span>
+                          </label>
+                        ))}
+                      </div>
+                      {form.watch("roommate_preferences")?.includes("Other") && (
+                        <textarea
+                          rows={2}
+                          placeholder="Please describe other preferences"
+                          {...form.register("other_roommate_preference")}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm mt-3"
+                        />
+                      )}
+                      <ErrorMessage message={form.formState.errors.roommate_preferences?.message} />
+                    </Fieldset>
+                  )}
 
                   <Fieldset label="Budget (monthly rent)" required>
                     <input
