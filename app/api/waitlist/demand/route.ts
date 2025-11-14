@@ -67,7 +67,10 @@ const demandPayloadSchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    console.log("📥 Received demand waitlist submission:", JSON.stringify(body, null, 2));
+
     const parsed = demandPayloadSchema.parse(body);
+    console.log("✅ Validation passed");
 
     const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
@@ -102,9 +105,11 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      console.error(error);
+      console.error("❌ Database error:", error);
       return NextResponse.json({ error: "Failed to save submission." }, { status: 500 });
     }
+
+    console.log("✅ Saved to database with ID:", data.id);
 
     await supabase.from("waitlist_events").insert({
       event_type: "demand_submission",
@@ -125,9 +130,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, id: data.id });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error("❌ Validation error:", JSON.stringify(error.flatten(), null, 2));
       return NextResponse.json({ error: error.flatten() }, { status: 400 });
     }
-    console.error(error);
+    console.error("❌ Unexpected error:", error);
     return NextResponse.json({ error: "Unexpected server error." }, { status: 500 });
   }
 }
