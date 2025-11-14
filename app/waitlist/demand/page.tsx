@@ -14,15 +14,13 @@ const contactOptions = ["email", "text"] as const;
 const housingSearchOptions = ["solo", "with_roommates"] as const;
 const sectorOptions = ["Tech", "Finance", "Consulting", "Healthcare", "Law", "Media", "Non-profit", "Government", "Startup", "Other"];
 const roommatePreferenceOptions = [
-  "Similar schedule/work hours",
-  "Shared interests or hobbies",
-  "Clean and organized",
-  "Social and outgoing",
-  "Quiet and respectful",
-  "Same gender",
+  "Similar routine",
+  "Similar lifestyle",
+  "Similar cleanliness level",
+  "Similar social vibe",
   "Similar age",
-  "Non-smoker",
-  "Pet-friendly",
+  "Same gender",
+  "Shared interests",
   "Other"
 ];
 const concernOptions = [
