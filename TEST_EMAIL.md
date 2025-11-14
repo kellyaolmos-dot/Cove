@@ -80,6 +80,29 @@
 - **API key invalid**: Regenerate in Resend dashboard
 - **Rate limits**: Resend free tier has limits (check dashboard)
 
+## ☕ Gmail SMTP Fallback (No Domain Yet)
+
+If you do not own a custom domain yet, you can send real emails by routing through Gmail instead of Resend.
+
+1. **Create an App Password** (only once)
+   - Log into https://myaccount.google.com/security
+   - Turn on 2-Step Verification if it is off
+   - Click **App passwords** → choose `Mail` + `Other (Custom name)` → copy the 16-character password
+2. **Add local env vars** in `.env.local` (and later in Vercel → Project → Settings → Environment Variables):
+
+   ```env
+   # Leave RESEND_API_KEY unset to force the fallback
+   GMAIL_USER=youremail@gmail.com
+   GMAIL_APP_PASSWORD=the-16-char-app-password
+   EMAIL_FROM="Cove Team <youremail@gmail.com>"
+   ```
+
+3. **Restart `npm run dev`** so the API route picks up the new env vars.
+4. **Submit the waitlist form** again. Because `RESEND_API_KEY` is missing, the backend now uses Nodemailer + Gmail SMTP.
+5. **Deploying to Vercel?** Add the exact same `GMAIL_*` vars (and optionally `EMAIL_FROM`) under both Preview and Production environments, redeploy, and you can approve entries from the hosted admin panel.
+
+> Later, when you buy a domain and verify it with Resend, just restore `RESEND_API_KEY` (and optionally remove the Gmail vars) to switch back without any code changes.
+
 ## 📊 Verify in Database
 
 After testing, check your Supabase database:

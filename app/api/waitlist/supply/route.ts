@@ -8,6 +8,33 @@ import { sendWaitlistConfirmationEmail } from "@/lib/email";
 const storageBucket = process.env.SUPABASE_STORAGE_BUCKET ?? "listing_uploads";
 
 const supplyPayloadSchema = z.object({
+  // Personal info
+  name: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  college: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  grad_year: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  linkedin: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  instagram: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  twitter: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+
+  // Listing info
   email: z.string().email(),
   address: z
     .string()
@@ -15,29 +42,36 @@ const supplyPayloadSchema = z.object({
     .transform((val) => (val?.trim() ? val.trim() : undefined)),
   city: z.string().min(1),
   rent: z
-    .union([z.number(), z.string()])
+    .string()
     .optional()
-    .transform((val) => {
-      if (val === undefined || val === null || val === "") return undefined;
-      const num = typeof val === "number" ? val : Number(val);
-      return Number.isFinite(num) && num > 0 ? num : undefined;
-    }),
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
   rooms: z
-    .union([z.number(), z.string()])
+    .string()
     .optional()
-    .transform((val) => {
-      if (val === undefined || val === null || val === "") return undefined;
-      const num = typeof val === "number" ? val : Number(val);
-      return Number.isFinite(num) && num > 0 ? Math.floor(num) : undefined;
-    }),
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
   listing_link: z
     .string()
     .optional()
     .transform((val) => (val?.trim() ? val.trim() : undefined)),
-  willing_to_verify: z.boolean(),
-  attachment_url: z
+  listing_photos: z
     .string()
-    .optional(),
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+
+  // Concerns
+  concerns: z.array(z.string()).min(1),
+  other_concern: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+
+  // Contact
+  contact_pref: z.array(z.enum(["email", "text"])).min(1),
+  phone: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  willing_to_verify: z.boolean(),
 });
 
 type SupplyPayload = z.infer<typeof supplyPayloadSchema>;
@@ -118,14 +152,25 @@ async function saveSupplySubmission(parsed: SupplyPayload) {
     .from("supply_waitlist")
     .insert([
       {
+        name: parsed.name,
+        college: parsed.college,
+        grad_year: parsed.grad_year,
+        linkedin: parsed.linkedin,
+        instagram: parsed.instagram,
+        twitter: parsed.twitter,
         email: parsed.email,
         address: parsed.address,
         city: parsed.city,
         rent: parsed.rent,
         rooms: parsed.rooms,
         listing_link: parsed.listing_link,
+        listing_photos: parsed.listing_photos,
+        concerns: parsed.concerns,
+        other_concern: parsed.other_concern,
+        contact_pref: parsed.contact_pref,
+        phone: parsed.phone,
         willing_to_verify: parsed.willing_to_verify,
-        attachment_url: parsed.attachment_url,
+        approval_status: "pending", // New submissions start as pending
       },
     ])
     .select("id")
@@ -145,6 +190,7 @@ async function saveSupplySubmission(parsed: SupplyPayload) {
     },
   });
 
+  // Send initial confirmation email (not approval yet)
   await sendWaitlistConfirmationEmail({
     type: "supply",
     email: parsed.email,

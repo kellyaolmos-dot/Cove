@@ -7,22 +7,68 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 
+const contactOptions = ["email", "text"] as const;
+const concernOptions = [
+  "Finding qualified tenants",
+  "Lease agreement concerns",
+  "Property management",
+  "Payment security",
+  "Background checks",
+  "Maintenance responsibilities",
+  "Other"
+];
+
 const supplySchema = z.object({
-  email: z.string().email(),
+  // Personal info
+  name: z.string().min(2, "Name is required.").max(120),
+  college: z.string().optional().or(z.literal("")),
+  grad_year: z.string().optional().or(z.literal("")),
+  linkedin: z.string().optional().or(z.literal("")),
+  instagram: z.string().optional().or(z.literal("")),
+  twitter: z.string().optional().or(z.literal("")),
+
+  // Listing info
   address: z.string().min(3, "Provide a street or building name."),
   city: z.string().min(2, "City is required."),
   rent: z.string().optional().or(z.literal("")),
   rooms: z.string().optional().or(z.literal("")),
   listing_link: z.string().optional().or(z.literal("")),
+  listing_photos: z.string().optional().or(z.literal("")), // URLs of photos
+
+  // Concerns and preferences
+  concerns: z.array(z.string()).min(1, "Select at least one concern."),
+  other_concern: z.string().optional().or(z.literal("")),
+
+  // Contact
+  contact_pref: z.array(z.enum(contactOptions)).min(1, "Choose at least one contact method."),
+  email: z.string().email(),
+  phone: z.string().optional().or(z.literal("")),
   willing_to_verify: z.boolean(),
 });
 
 type SupplyValues = z.infer<typeof supplySchema>;
 
 const steps = [
-  { id: 0, title: "Basics", fields: ["address", "city", "rent", "rooms"] as const },
-  { id: 1, title: "Listing details", fields: ["listing_link"] as const },
-  { id: 2, title: "Verification", fields: ["email", "willing_to_verify"] as const },
+  {
+    id: 0,
+    title: "Tell us about you",
+    fields: ["name", "college", "grad_year", "linkedin", "instagram", "twitter"] as const
+  },
+  {
+    id: 1,
+    title: "Listing info",
+    fields: ["address", "city", "rent", "rooms", "listing_link", "listing_photos"] as const
+  },
+  {
+    id: 2,
+    title: "Concerns & preferences",
+    fields: ["concerns", "other_concern"] as const
+  },
+  {
+    id: 3,
+    title: "Contact & verification",
+    fields: ["contact_pref", "email", "phone", "willing_to_verify"] as const
+  },
 ] as const;
 
 export default function SupplyWaitlistPage() {
@@ -30,12 +76,13 @@ export default function SupplyWaitlistPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [attachment, setAttachment] = useState<File | null>(null);
 
   const form = useForm<SupplyValues>({
     resolver: zodResolver(supplySchema),
     defaultValues: {
       willing_to_verify: true,
+      concerns: [],
+      contact_pref: ["email"],
     },
   });
 
@@ -54,29 +101,24 @@ export default function SupplyWaitlistPage() {
     setErrorMessage(null);
     startTransition(async () => {
       try {
-        const formData = new FormData();
-        Object.entries(values).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            formData.append(key, String(value));
-          }
-        });
-        if (attachment) {
-          formData.append("attachment", attachment);
-        }
         const response = await fetch("/api/waitlist/supply", {
           method: "POST",
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
         });
+
         if (!response.ok) {
           const data = await response.json();
           console.error(data);
           setErrorMessage("Unable to save your submission. Please try again.");
           return;
         }
+
         logAnalyticsEvent("supply_form_submitted", {
           city: values.city,
           willing_to_verify: values.willing_to_verify,
         });
+
         router.push("/waitlist/thank-you?type=supply");
       } catch (error) {
         console.error(error);
@@ -118,6 +160,65 @@ export default function SupplyWaitlistPage() {
             >
               {currentStep === 0 && (
                 <>
+                  <Field label="Name" required>
+                    <input
+                      type="text"
+                      placeholder="Preferred name"
+                      {...form.register("name")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                    <Error message={form.formState.errors.name?.message} />
+                  </Field>
+
+                  <Field label="College or University">
+                    <input
+                      type="text"
+                      placeholder="e.g., Boston University"
+                      {...form.register("college")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                  </Field>
+
+                  <Field label="Graduation year">
+                    <input
+                      type="text"
+                      placeholder="2025"
+                      {...form.register("grad_year")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                  </Field>
+
+                  <Field label="LinkedIn">
+                    <input
+                      type="url"
+                      placeholder="https://linkedin.com/in/you"
+                      {...form.register("linkedin")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                  </Field>
+
+                  <Field label="Instagram">
+                    <input
+                      type="text"
+                      placeholder="@yourusername"
+                      {...form.register("instagram")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                  </Field>
+
+                  <Field label="X (Twitter)">
+                    <input
+                      type="text"
+                      placeholder="@yourusername"
+                      {...form.register("twitter")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                  </Field>
+                </>
+              )}
+
+              {currentStep === 1 && (
+                <>
                   <Field label="Address or building" required>
                     <input
                       type="text"
@@ -127,6 +228,7 @@ export default function SupplyWaitlistPage() {
                     />
                     <Error message={form.formState.errors.address?.message} />
                   </Field>
+
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="City" required>
                       <input
@@ -137,64 +239,122 @@ export default function SupplyWaitlistPage() {
                       />
                       <Error message={form.formState.errors.city?.message} />
                     </Field>
-                    <Field label="Monthly rent (approx)">
+
+                    <Field label="Monthly rent">
                       <input
-                        type="number"
-                        inputMode="numeric"
+                        type="text"
                         {...form.register("rent")}
-                        placeholder="2200"
+                        placeholder="$2,200"
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                       />
                     </Field>
                   </div>
-                  <Field label="Bedrooms or rooms">
+
+                  <Field label="Number of bedrooms">
                     <input
-                      type="number"
-                      inputMode="numeric"
+                      type="text"
                       {...form.register("rooms")}
                       placeholder="2"
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     />
                   </Field>
-                </>
-              )}
 
-              {currentStep === 1 && (
-                <>
-                  <Field label="If you've posted your listing on Facebook groups or anywhere else share the listing link">
+                  <Field label="Listing link (if posted elsewhere)">
                     <input
                       type="url"
                       {...form.register("listing_link")}
-                      placeholder="https://"
+                      placeholder="https://facebook.com/groups/..."
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     />
+                    <p className="text-xs text-gray-500">Share if you&apos;ve posted on Facebook groups, Craigslist, etc.</p>
                   </Field>
-                  <Field label="Upload walkthrough, photos, or flyers of your listing">
+
+                  <Field label="Photo links">
                     <input
-                      type="file"
-                      accept="image/*,application/pdf"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        setAttachment(file ?? null);
-                      }}
-                      className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:border-0 file:rounded-md file:bg-gray-100 file:text-gray-900"
+                      type="text"
+                      {...form.register("listing_photos")}
+                      placeholder="https://drive.google.com/... or imgur.com/..."
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     />
-                    <p className="text-xs text-gray-500">Optional. Images or PDFs help us verify faster.</p>
+                    <p className="text-xs text-gray-500">Share links to photos (Google Drive, Imgur, Dropbox, etc.)</p>
                   </Field>
                 </>
               )}
 
               {currentStep === 2 && (
                 <>
-                  <Field label="Email" required>
-                    <input
-                      type="email"
-                      {...form.register("email")}
-                      placeholder="you@company.com"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                    />
-                    <Error message={form.formState.errors.email?.message} />
+                  <Field label="What concerns do you have about listing your property?" required>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {concernOptions.map((concern) => (
+                        <label
+                          key={concern}
+                          className={`flex items-center gap-3 border rounded-md px-4 py-3 text-sm ${
+                            form.watch("concerns").includes(concern)
+                              ? "border-gray-900"
+                              : "border-gray-200"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            value={concern}
+                            {...form.register("concerns")}
+                          />
+                          <span>{concern}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {form.watch("concerns").includes("Other") && (
+                      <textarea
+                        rows={3}
+                        placeholder="Please describe your other concerns"
+                        {...form.register("other_concern")}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm mt-3"
+                      />
+                    )}
+                    <Error message={form.formState.errors.concerns?.message} />
                   </Field>
+                </>
+              )}
+
+              {currentStep === 3 && (
+                <>
+                  <Field label="How should we reach out?" required>
+                    <div className="flex flex-wrap gap-3">
+                      {contactOptions.map((option) => (
+                        <label key={option} className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            value={option}
+                            {...form.register("contact_pref")}
+                          />
+                          <span className="capitalize">{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <Error message={form.formState.errors.contact_pref?.message} />
+                  </Field>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Email" required>
+                      <input
+                        type="email"
+                        {...form.register("email")}
+                        placeholder="you@company.com"
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      />
+                      <Error message={form.formState.errors.email?.message} />
+                    </Field>
+
+                    <Field label="Phone">
+                      <input
+                        type="tel"
+                        placeholder="(xxx) xxx-xxxx"
+                        {...form.register("phone")}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      />
+                    </Field>
+                  </div>
+
                   <Field label="Verification consent" required>
                     <label className="flex items-start gap-3 text-sm text-gray-700">
                       <input
@@ -204,7 +364,7 @@ export default function SupplyWaitlistPage() {
                         className="mt-1"
                       />
                       <span>
-                        I’m willing to verify ownership/lease details so Cove can share this listing with qualified
+                        I&apos;m willing to verify ownership/lease details so Cove can share this listing with qualified
                         renters.
                       </span>
                     </label>
