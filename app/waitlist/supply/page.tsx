@@ -76,6 +76,9 @@ export default function SupplyWaitlistPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const form = useForm<SupplyValues>({
     resolver: zodResolver(supplySchema),
@@ -97,14 +100,72 @@ export default function SupplyWaitlistPage() {
 
   const goBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
-  const handleSubmit = form.handleSubmit((values) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    if (files.length > 5) {
+      setUploadError("Maximum 5 files allowed");
+      return;
+    }
+
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        setUploadError("Each file must be under 5MB");
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        setUploadError("Only image files are allowed");
+        return;
+      }
+    }
+
+    setUploadedFiles(files);
+    setUploadError(null);
+  };
+
+  const handleSubmit = form.handleSubmit(async (values) => {
     setErrorMessage(null);
+
+    // Upload files first if any
+    let photoUrls: string[] = [];
+    if (uploadedFiles.length > 0) {
+      setIsUploading(true);
+      try {
+        const formData = new FormData();
+        uploadedFiles.forEach((file) => formData.append("files", file));
+
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          const error = await uploadResponse.json();
+          setUploadError(error.error || "Failed to upload photos");
+          setIsUploading(false);
+          return;
+        }
+
+        const { urls } = await uploadResponse.json();
+        photoUrls = urls;
+      } catch (error) {
+        console.error("Upload error:", error);
+        setUploadError("Failed to upload photos");
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
     startTransition(async () => {
       try {
         const response = await fetch("/api/waitlist/supply", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
+          body: JSON.stringify({
+            ...values,
+            listing_photos: photoUrls.join(","), // Store as comma-separated URLs
+          }),
         });
 
         if (!response.ok) {
@@ -269,14 +330,27 @@ export default function SupplyWaitlistPage() {
                     <p className="text-xs text-gray-500">Share if you&apos;ve posted on Facebook groups, Craigslist, etc.</p>
                   </Field>
 
-                  <Field label="Photo links">
-                    <input
-                      type="text"
-                      {...form.register("listing_photos")}
-                      placeholder="https://drive.google.com/... or imgur.com/..."
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                    />
-                    <p className="text-xs text-gray-500">Share links to photos (Google Drive, Imgur, Dropbox, etc.)</p>
+                  <Field label="Upload photos">
+                    <div className="space-y-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileChange}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-900 file:text-white hover:file:bg-gray-800"
+                      />
+                      <p className="text-xs text-gray-500">
+                        Upload up to 5 photos (max 5MB each). Images only.
+                      </p>
+                      {uploadedFiles.length > 0 && (
+                        <div className="text-sm text-gray-700">
+                          {uploadedFiles.length} file{uploadedFiles.length > 1 ? "s" : ""} selected
+                        </div>
+                      )}
+                      {uploadError && (
+                        <p className="text-sm text-red-600">{uploadError}</p>
+                      )}
+                    </div>
                   </Field>
                 </>
               )}
@@ -397,10 +471,10 @@ export default function SupplyWaitlistPage() {
             ) : (
               <button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || isUploading}
                 className="px-6 py-2 rounded-md border border-gray-900 text-gray-900 text-sm font-medium disabled:opacity-50"
               >
-                {isPending ? "Submitting..." : "Share listing"}
+                {isUploading ? "Uploading photos..." : isPending ? "Submitting..." : "Share listing"}
               </button>
             )}
           </div>
