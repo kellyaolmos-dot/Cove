@@ -15,13 +15,10 @@ export default function Hero() {
             Early access waitlist
           </p>
           <h1 className="text-4xl sm:text-5xl font-semibold text-gray-900">
-            Find verified housing and compatible roommates in your next city — whether you’re
-            recruiting or relocating.
+            Find verified housing and compatible roommates in your next city — whether you’re recruiting or relocating.
           </h1>
           <p className="text-base text-gray-600 max-w-3xl mx-auto">
-            Cove is a two-sided housing network for interns and young professionals. We collect
-            detailed demand + supply signals so you can skip the group chat chaos and land in a vetted
-            space faster.
+            Cove is a two-sided housing network for interns and young professionals. We collect detailed demand + supply signals so you can skip the group chat chaos and land in a vetted space faster.
           </p>
         </div>
 

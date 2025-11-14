@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Encode_Sans_Semi_Expanded } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
 
 const encodeSans = Encode_Sans_Semi_Expanded({
   subsets: ["latin"],
@@ -21,7 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${encodeSans.className} antialiased`}>{children}</body>
+      <body className={`${encodeSans.className} antialiased`}>
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

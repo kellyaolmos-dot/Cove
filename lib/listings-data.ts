@@ -1,0 +1,193 @@
+export interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  address: string;
+  city: "San Francisco" | "Washington DC" | "New York";
+  neighborhood: string;
+  lat: number;
+  lng: number;
+  price: number;
+  bedrooms: number;
+  bathrooms: number;
+  availableFrom: string; // ISO date string
+  availableTo: string; // ISO date string
+  photos: string[];
+  amenities: string[];
+  maxGuests: number;
+}
+
+export const mockListings: Listing[] = [
+  // San Francisco listings
+  {
+    id: "sf-1",
+    title: "Sunny Mission District Studio",
+    description: "Bright studio apartment in the heart of Mission District. Perfect for young professionals. Walking distance to BART, restaurants, and cafes.",
+    address: "3245 Valencia St",
+    city: "San Francisco",
+    neighborhood: "Mission District",
+    lat: 37.7599,
+    lng: -122.4209,
+    price: 2800,
+    bedrooms: 0,
+    bathrooms: 1,
+    availableFrom: "2026-06-01",
+    availableTo: "2026-08-31",
+    photos: ["/placeholder-listing-1.jpg"],
+    amenities: ["WiFi", "Kitchen", "Heating", "Washer"],
+    maxGuests: 2,
+  },
+  {
+    id: "sf-2",
+    title: "Charming Nob Hill 1BR",
+    description: "Elegant one-bedroom apartment with city views. Located in prestigious Nob Hill neighborhood near cable car lines.",
+    address: "1234 California St",
+    city: "San Francisco",
+    neighborhood: "Nob Hill",
+    lat: 37.7915,
+    lng: -122.4144,
+    price: 3200,
+    bedrooms: 1,
+    bathrooms: 1,
+    availableFrom: "2026-07-01",
+    availableTo: "2026-09-30",
+    photos: ["/placeholder-listing-2.jpg"],
+    amenities: ["WiFi", "Kitchen", "AC", "Parking", "Gym"],
+    maxGuests: 2,
+  },
+  {
+    id: "sf-3",
+    title: "Spacious Hayes Valley 2BR",
+    description: "Modern two-bedroom in trendy Hayes Valley. High ceilings, natural light, close to parks and shopping.",
+    address: "567 Hayes St",
+    city: "San Francisco",
+    neighborhood: "Hayes Valley",
+    lat: 37.7756,
+    lng: -122.4264,
+    price: 4500,
+    bedrooms: 2,
+    bathrooms: 2,
+    availableFrom: "2026-05-01",
+    availableTo: "2026-10-31",
+    photos: ["/placeholder-listing-3.jpg"],
+    amenities: ["WiFi", "Kitchen", "AC", "Washer", "Dryer", "Dishwasher"],
+    maxGuests: 3,
+  },
+  // Washington DC listings
+  {
+    id: "dc-1",
+    title: "Modern Dupont Circle Studio",
+    description: "Contemporary studio in vibrant Dupont Circle. Steps from metro, restaurants, and nightlife.",
+    address: "1850 Q St NW",
+    city: "Washington DC",
+    neighborhood: "Dupont Circle",
+    lat: 38.9095,
+    lng: -77.0431,
+    price: 2200,
+    bedrooms: 0,
+    bathrooms: 1,
+    availableFrom: "2026-06-01",
+    availableTo: "2026-12-31",
+    photos: ["/placeholder-listing-4.jpg"],
+    amenities: ["WiFi", "Kitchen", "AC", "Heating"],
+    maxGuests: 2,
+  },
+  {
+    id: "dc-2",
+    title: "Historic Capitol Hill 1BR",
+    description: "Beautiful one-bedroom in historic Capitol Hill rowhouse. Walking distance to Capitol and Library of Congress.",
+    address: "234 East Capitol St SE",
+    city: "Washington DC",
+    neighborhood: "Capitol Hill",
+    lat: 38.8894,
+    lng: -76.9961,
+    price: 2600,
+    bedrooms: 1,
+    bathrooms: 1,
+    availableFrom: "2026-07-01",
+    availableTo: "2026-11-30",
+    photos: ["/placeholder-listing-5.jpg"],
+    amenities: ["WiFi", "Kitchen", "AC", "Heating", "Washer", "Dryer"],
+    maxGuests: 2,
+  },
+  {
+    id: "dc-3",
+    title: "Elegant Georgetown 2BR",
+    description: "Upscale two-bedroom in historic Georgetown. Hardwood floors, updated kitchen, near waterfront.",
+    address: "3301 M St NW",
+    city: "Washington DC",
+    neighborhood: "Georgetown",
+    lat: 38.9051,
+    lng: -77.0625,
+    price: 3800,
+    bedrooms: 2,
+    bathrooms: 2,
+    availableFrom: "2026-05-01",
+    availableTo: "2026-08-31",
+    photos: ["/placeholder-listing-6.jpg"],
+    amenities: ["WiFi", "Kitchen", "AC", "Heating", "Washer", "Dryer", "Parking"],
+    maxGuests: 4,
+  },
+  // New York listings
+  {
+    id: "ny-1",
+    title: "Vibrant East Village Studio",
+    description: "Cozy studio in the heart of East Village. Surrounded by restaurants, bars, and cultural venues.",
+    address: "145 Avenue A",
+    city: "New York",
+    neighborhood: "East Village",
+    lat: 40.7264,
+    lng: -73.9818,
+    price: 3000,
+    bedrooms: 0,
+    bathrooms: 1,
+    availableFrom: "2026-06-01",
+    availableTo: "2026-09-30",
+    photos: ["/placeholder-listing-7.jpg"],
+    amenities: ["WiFi", "Kitchen", "AC", "Heating"],
+    maxGuests: 2,
+  },
+  {
+    id: "ny-2",
+    title: "Classic Upper West Side 1BR",
+    description: "Pre-war one-bedroom with character. Near Central Park, museums, and excellent restaurants.",
+    address: "245 W 72nd St",
+    city: "New York",
+    neighborhood: "Upper West Side",
+    lat: 40.7785,
+    lng: -73.9803,
+    price: 3600,
+    bedrooms: 1,
+    bathrooms: 1,
+    availableFrom: "2026-07-01",
+    availableTo: "2026-10-31",
+    photos: ["/placeholder-listing-8.jpg"],
+    amenities: ["WiFi", "Kitchen", "AC", "Heating", "Doorman", "Elevator"],
+    maxGuests: 2,
+  },
+  {
+    id: "ny-3",
+    title: "Trendy Williamsburg 2BR",
+    description: "Modern two-bedroom in hip Williamsburg. Rooftop access, close to L train, Brooklyn nightlife.",
+    address: "123 Bedford Ave",
+    city: "New York",
+    neighborhood: "Williamsburg",
+    lat: 40.7181,
+    lng: -73.9571,
+    price: 4200,
+    bedrooms: 2,
+    bathrooms: 2,
+    availableFrom: "2026-05-01",
+    availableTo: "2026-12-31",
+    photos: ["/placeholder-listing-9.jpg"],
+    amenities: ["WiFi", "Kitchen", "AC", "Heating", "Washer", "Dryer", "Rooftop"],
+    maxGuests: 3,
+  },
+];
+
+export const cityCoordinates = {
+  "San Francisco": { lat: 37.7749, lng: -122.4194, zoom: 12 },
+  "Washington DC": { lat: 38.9072, lng: -77.0369, zoom: 12 },
+  "New York": { lat: 40.7128, lng: -74.0060, zoom: 11 },
+  All: { lat: 39.8283, lng: -98.5795, zoom: 3.5 }, // Center of USA
+};
