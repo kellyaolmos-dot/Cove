@@ -22,6 +22,18 @@ const demandPayloadSchema = z.object({
     .string()
     .optional()
     .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  linkedin: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  instagram: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  twitter: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
   status: z.enum(["confirmed", "recruiting", "exploring"]),
   target_cities: z.array(z.string()).min(1),
   move_in_month: z.string().min(1),
@@ -29,10 +41,14 @@ const demandPayloadSchema = z.object({
     .string()
     .optional()
     .transform((val) => (val?.trim() ? val.trim() : undefined)),
-  roommate_pref: z
+  sector: z
     .string()
-    .min(3, "Tell us a bit about your roommate preferences."),
-  linkedin: z
+    .optional()
+    .transform((val) => (val?.trim() ? val.trim() : undefined)),
+  housing_search_type: z.enum(["solo", "with_roommates"]),
+  budget: z.string().min(1),
+  concerns: z.array(z.string()).min(1),
+  other_concern: z
     .string()
     .optional()
     .transform((val) => (val?.trim() ? val.trim() : undefined)),
@@ -58,14 +74,21 @@ export async function POST(request: Request) {
           phone: parsed.phone,
           college: parsed.college,
           grad_year: parsed.grad_year,
+          linkedin: parsed.linkedin,
+          instagram: parsed.instagram,
+          twitter: parsed.twitter,
           status: parsed.status,
           target_cities: parsed.target_cities,
           move_in_month: parsed.move_in_month,
           company: parsed.company,
-          roommate_pref: parsed.roommate_pref,
-          linkedin: parsed.linkedin,
+          sector: parsed.sector,
+          housing_search_type: parsed.housing_search_type,
+          budget: parsed.budget,
+          concerns: parsed.concerns,
+          other_concern: parsed.other_concern,
           contact_pref: parsed.contact_pref,
           referrer_id: parsed.referrer_id ?? null,
+          approval_status: "pending", // New submissions start as pending
         },
       ])
       .select("id")
@@ -85,6 +108,7 @@ export async function POST(request: Request) {
       },
     });
 
+    // Send initial confirmation email (not approval yet)
     await sendWaitlistConfirmationEmail({
       type: "demand",
       email: parsed.email,

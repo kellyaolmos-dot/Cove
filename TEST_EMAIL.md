@@ -1,0 +1,107 @@
+# Email Testing Checklist
+
+## ✅ Pre-flight Checks
+
+- [x] RESEND_API_KEY is set in `.env.local`
+- [ ] Domain verified in Resend (if using custom domain)
+- [ ] Dev server is running
+
+## 📧 Test 1: Confirmation Email
+
+1. Navigate to: http://localhost:3000/waitlist/demand
+2. Fill out form with test data (use your real email)
+3. Submit form
+4. Check for email: "Application received - Cove Waitlist"
+5. **Check spam folder if not in inbox**
+
+### Expected Email Content:
+- Subject: "Application received - Cove Waitlist"
+- From: "Cove Team <hello@cove.house>"
+- Message: Application pending review
+- No referral link yet
+
+## 🔐 Test 2: Admin Approval
+
+1. Navigate to: http://localhost:3000/admin/waitlist
+2. Enter admin key: `cove_admin_2024`
+3. View pending applications
+4. Click on test application
+5. Click "Approve & Send Email with Referral Link"
+
+## 📨 Test 3: Approval Email
+
+1. Check email for: "Welcome to Cove! Your exclusive invite link inside"
+2. Verify referral link is present
+3. Verify referral link format: `http://localhost:3000/waitlist/demand?r={uuid}`
+
+### Expected Email Content:
+- Subject: "Welcome to Cove! Your exclusive invite link inside"
+- From: "Cove Team <hello@cove.house>"
+- Contains: Exclusive referral link in styled box
+- Message: Welcome to community + referral instructions
+
+## 🔗 Test 4: Referral Link
+
+1. Copy referral link from approval email
+2. Open in new browser window
+3. Fill out form again (different email)
+4. Submit
+5. Verify in database that `referrer_id` is set
+
+## 🐛 Troubleshooting
+
+### Emails not sending?
+
+1. **Check server console for errors:**
+   - Look for "RESEND_API_KEY not set" warning
+   - Look for any API errors from Resend
+
+2. **Verify Resend domain:**
+   - Go to https://resend.com/domains
+   - Check if `cove.house` is verified
+   - If not, you may need to use `onboarding@resend.dev` temporarily
+
+3. **Check Resend dashboard:**
+   - Go to https://resend.com/emails
+   - View sent/failed emails
+   - Check delivery status
+
+4. **Temporary fix for testing:**
+   - Use `onboarding@resend.dev` as sender (no domain verification needed)
+   - Update `lib/email.ts` temporarily:
+     ```typescript
+     from: "Cove Team <onboarding@resend.dev>"
+     ```
+
+### Common Issues:
+
+- **"Domain not verified"**: Use `onboarding@resend.dev` for testing
+- **Emails in spam**: Normal for new domains, ask recipients to mark as "Not Spam"
+- **API key invalid**: Regenerate in Resend dashboard
+- **Rate limits**: Resend free tier has limits (check dashboard)
+
+## 📊 Verify in Database
+
+After testing, check your Supabase database:
+
+```sql
+-- View all demand waitlist entries
+SELECT id, name, email, approval_status, created_at
+FROM demand_waitlist
+ORDER BY created_at DESC
+LIMIT 10;
+
+-- View referral tracking
+SELECT id, name, email, referrer_id, approval_status
+FROM demand_waitlist
+WHERE referrer_id IS NOT NULL;
+```
+
+## 🎯 Success Criteria
+
+- [ ] Confirmation email received after form submission
+- [ ] Entry shows as "pending" in admin panel
+- [ ] Approval email received after admin approval
+- [ ] Referral link in email is correct format
+- [ ] Using referral link tracks referrer_id in database
+- [ ] Both emails have proper formatting and branding

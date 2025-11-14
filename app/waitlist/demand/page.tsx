@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo, Suspense } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,6 +11,18 @@ const cityOptions = ["NYC", "Boston", "SF", "Chicago", "DC", "LA", "Austin", "Ot
 const moveInOptions = ["May 2026", "June 2026", "July 2026", "Fall 2026", "Not sure yet"];
 const statusOptions = ["confirmed", "recruiting", "exploring"] as const;
 const contactOptions = ["email", "text"] as const;
+const housingSearchOptions = ["solo", "with_roommates"] as const;
+const sectorOptions = ["Tech", "Finance", "Consulting", "Healthcare", "Law", "Media", "Non-profit", "Government", "Startup", "Other"];
+const concernOptions = [
+  "Finding affordable housing",
+  "Finding roommates",
+  "Understanding the neighborhood",
+  "Navigating the lease process",
+  "Moving logistics",
+  "Safety concerns",
+  "Commute to work",
+  "Other"
+];
 
 const demandFormSchema = z.object({
   name: z.string().min(2, "Name is required.").max(120),
@@ -19,16 +31,22 @@ const demandFormSchema = z.object({
     .string()
     .min(4, "Grad year is required.")
     .max(10, "Grad year should be short."),
+  linkedin: z.string().optional().or(z.literal("")),
+  instagram: z.string().optional().or(z.literal("")),
+  twitter: z.string().optional().or(z.literal("")),
   status: z.enum(statusOptions),
   target_cities: z.array(z.string()).min(1, "Pick at least one city."),
-  other_city: z.string().optional(),
+  other_city: z.string().optional().or(z.literal("")),
   move_in_month: z.string(),
-  company: z.string().max(120).optional(),
-  roommate_pref: z.string().min(5, "Share a short note about preferences."),
-  linkedin: z.union([z.string().url(), z.literal("")]).optional(),
+  company: z.string().max(120).optional().or(z.literal("")),
+  sector: z.string().optional().or(z.literal("")),
+  housing_search_type: z.enum(housingSearchOptions),
+  budget: z.string().min(1, "Budget is required."),
+  concerns: z.array(z.string()).min(1, "Select at least one concern."),
+  other_concern: z.string().optional().or(z.literal("")),
   contact_pref: z.array(z.enum(contactOptions)).min(1, "Choose at least one contact method."),
   email: z.string().email(),
-  phone: z.string().optional(),
+  phone: z.string().optional().or(z.literal("")),
 });
 
 type DemandFormValues = z.infer<typeof demandFormSchema>;
@@ -37,17 +55,17 @@ const steps = [
   {
     id: 0,
     title: "Tell us about you",
-    fields: ["name", "college", "grad_year"] as const,
+    fields: ["name", "college", "grad_year", "linkedin", "instagram", "twitter"] as const,
   },
   {
     id: 1,
-    title: "Timeline & cities",
-    fields: ["status", "target_cities", "other_city", "move_in_month"] as const,
+    title: "Where are you headed?",
+    fields: ["status", "target_cities", "other_city", "move_in_month", "company", "sector"] as const,
   },
   {
     id: 2,
-    title: "Context",
-    fields: ["company", "roommate_pref", "linkedin"] as const,
+    title: "Housing preferences",
+    fields: ["housing_search_type", "budget", "concerns", "other_concern"] as const,
   },
   {
     id: 3,
@@ -56,7 +74,7 @@ const steps = [
   },
 ] as const;
 
-function DemandWaitlistForm() {
+export default function DemandWaitlistPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const referrerId = searchParams.get("r") ?? undefined;
@@ -72,14 +90,11 @@ function DemandWaitlistForm() {
       grad_year: "",
       status: "recruiting",
       target_cities: [],
-      other_city: "",
       move_in_month: "Not sure yet",
-      company: "",
-      roommate_pref: "",
-      linkedin: "",
+      housing_search_type: "with_roommates",
+      budget: "",
+      concerns: [],
       contact_pref: ["email"],
-      email: "",
-      phone: "",
     },
   });
 
@@ -130,15 +145,13 @@ function DemandWaitlistForm() {
           return;
         }
 
-        const data = await response.json();
-
         logAnalyticsEvent("demand_form_submitted", {
           cities: targetCities,
           status: values.status,
         });
 
         router.push(
-          `/waitlist/thank-you?type=demand&cities=${encodeURIComponent(targetCities.join(","))}&id=${data.id}`
+          `/waitlist/thank-you?type=demand&cities=${encodeURIComponent(targetCities.join(","))}`
         );
       } catch (err) {
         console.error(err);
@@ -212,6 +225,34 @@ function DemandWaitlistForm() {
                     />
                     <ErrorMessage message={form.formState.errors.grad_year?.message} />
                   </Fieldset>
+
+                  <Fieldset label="LinkedIn">
+                    <input
+                      type="url"
+                      placeholder="https://linkedin.com/in/you"
+                      {...form.register("linkedin")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                    <ErrorMessage message={form.formState.errors.linkedin?.message} />
+                  </Fieldset>
+
+                  <Fieldset label="Instagram">
+                    <input
+                      type="text"
+                      placeholder="@yourusername"
+                      {...form.register("instagram")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                  </Fieldset>
+
+                  <Fieldset label="X (Twitter)">
+                    <input
+                      type="text"
+                      placeholder="@yourusername"
+                      {...form.register("twitter")}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    />
+                  </Fieldset>
                 </>
               )}
 
@@ -241,7 +282,7 @@ function DemandWaitlistForm() {
                     <ErrorMessage message={form.formState.errors.status?.message} />
                   </Fieldset>
 
-                  <Fieldset label="Target cities" required>
+                  <Fieldset label="Where are you headed or intending to go?" required>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {cityOptions.map((city) => (
                         <label
@@ -284,37 +325,109 @@ function DemandWaitlistForm() {
                       ))}
                     </select>
                   </Fieldset>
-                </>
-              )}
 
-              {currentStep === 2 && (
-                <>
-                  <Fieldset label="Company or program">
+                  <Fieldset label="Where are you working or where do you anticipate working?">
                     <input
                       type="text"
-                      placeholder="e.g., Tesla SWE internship"
+                      placeholder="e.g., Google, Goldman Sachs, or Exploring opportunities"
                       {...form.register("company")}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     />
                   </Fieldset>
 
-                  <Fieldset label="Roommate preferences" required>
-                    <textarea
-                      rows={4}
-                      placeholder="Lifestyle, budget, building requirements—anything that helps us match you."
-                      {...form.register("roommate_pref")}
+                  <Fieldset label="Sector">
+                    <select
+                      {...form.register("sector")}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                    />
-                    <ErrorMessage message={form.formState.errors.roommate_pref?.message} />
+                    >
+                      <option value="">Select a sector</option>
+                      {sectorOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </Fieldset>
+                </>
+              )}
+
+              {currentStep === 2 && (
+                <>
+                  <Fieldset label="Do you want to find housing solo or with roommates?" required>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label
+                        className={`border rounded-md px-4 py-3 text-sm cursor-pointer ${
+                          form.watch("housing_search_type") === "solo"
+                            ? "border-gray-900 bg-gray-900 text-white"
+                            : "border-gray-200 text-gray-700"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          value="solo"
+                          {...form.register("housing_search_type")}
+                          className="sr-only"
+                        />
+                        Solo
+                      </label>
+                      <label
+                        className={`border rounded-md px-4 py-3 text-sm cursor-pointer ${
+                          form.watch("housing_search_type") === "with_roommates"
+                            ? "border-gray-900 bg-gray-900 text-white"
+                            : "border-gray-200 text-gray-700"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          value="with_roommates"
+                          {...form.register("housing_search_type")}
+                          className="sr-only"
+                        />
+                        With roommates
+                      </label>
+                    </div>
+                    <ErrorMessage message={form.formState.errors.housing_search_type?.message} />
                   </Fieldset>
 
-                  <Fieldset label="LinkedIn">
+                  <Fieldset label="Budget (monthly rent)" required>
                     <input
-                      type="url"
-                      placeholder="https://linkedin.com/in/you"
-                      {...form.register("linkedin")}
+                      type="text"
+                      placeholder="e.g., $1,500 - $2,000"
+                      {...form.register("budget")}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     />
+                    <ErrorMessage message={form.formState.errors.budget?.message} />
+                  </Fieldset>
+
+                  <Fieldset label="Any concerns about finding housing or moving to a new city?" required>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {concernOptions.map((concern) => (
+                        <label
+                          key={concern}
+                          className={`flex items-center gap-3 border rounded-md px-4 py-3 text-sm ${
+                            form.watch("concerns").includes(concern)
+                              ? "border-gray-900"
+                              : "border-gray-200"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            value={concern}
+                            {...form.register("concerns")}
+                          />
+                          <span>{concern}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {form.watch("concerns").includes("Other") && (
+                      <textarea
+                        rows={3}
+                        placeholder="Please describe your other concerns"
+                        {...form.register("other_concern")}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      />
+                    )}
+                    <ErrorMessage message={form.formState.errors.concerns?.message} />
                   </Fieldset>
                 </>
               )}
@@ -441,13 +554,4 @@ function logAnalyticsEvent(eventType: string, payload: Record<string, unknown>) 
   }).catch((error) => console.error("Analytics error", error));
 }
 
-export default function DemandWaitlistPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>}>
-      <DemandWaitlistForm />
-    </Suspense>
-  );
-}
 
-console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log("Service key prefix:", process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 6));

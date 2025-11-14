@@ -11,9 +11,18 @@ const supplySchema = z.object({
   email: z.string().email(),
   address: z.string().min(3, "Provide a street or building name."),
   city: z.string().min(2, "City is required."),
-  rent: z.string().optional(),
-  rooms: z.string().optional(),
-  listing_link: z.string().optional(),
+  rent: z
+    .string()
+    .optional()
+    .transform((val) => (val ? Number(val) : undefined)),
+  rooms: z
+    .string()
+    .optional()
+    .transform((val) => (val ? Number(val) : undefined)),
+  listing_link: z
+    .string()
+    .optional()
+    .transform((val) => (val ? val : undefined)),
   willing_to_verify: z.boolean(),
 });
 
@@ -35,12 +44,6 @@ export default function SupplyWaitlistPage() {
   const form = useForm<SupplyValues>({
     resolver: zodResolver(supplySchema),
     defaultValues: {
-      email: "",
-      address: "",
-      city: "",
-      rent: "",
-      rooms: "",
-      listing_link: "",
       willing_to_verify: true,
     },
   });
@@ -167,7 +170,7 @@ export default function SupplyWaitlistPage() {
 
               {currentStep === 1 && (
                 <>
-                  <Field label="Listing link">
+                  <Field label="If you've posted your listing on Facebook groups or anywhere else share the listing link">
                     <input
                       type="url"
                       {...form.register("listing_link")}
@@ -175,7 +178,7 @@ export default function SupplyWaitlistPage() {
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     />
                   </Field>
-                  <Field label="Upload walkthrough or flyer">
+                  <Field label="Upload walkthrough, photos, or flyers of your listing">
                     <input
                       type="file"
                       accept="image/*,application/pdf"
