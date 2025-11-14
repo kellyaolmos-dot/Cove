@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 interface FilterBarProps {
   selectedCity: string;
   onCityChange: (city: string) => void;
@@ -50,7 +48,7 @@ export default function FilterBar({
       </div>
 
       {/* Date Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
           <label
             htmlFor="move-in-date"
@@ -63,7 +61,7 @@ export default function FilterBar({
             id="move-in-date"
             value={moveInDate}
             onChange={(e) => onMoveInChange(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 appearance-none"
           />
         </div>
 
@@ -79,7 +77,7 @@ export default function FilterBar({
             id="move-out-date"
             value={moveOutDate}
             onChange={(e) => onMoveOutChange(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 appearance-none"
           />
         </div>
       </div>
