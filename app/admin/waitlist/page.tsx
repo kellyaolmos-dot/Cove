@@ -142,7 +142,7 @@ export default function AdminWaitlistPage() {
                 </div>
                 <div className="space-y-1 text-sm text-gray-600">
                   <p>{entry.email}</p>
-                  <p>{entry.college} '{entry.grad_year}</p>
+                  <p>{entry.college} &apos;{entry.grad_year}</p>
                   <p className="font-medium text-gray-900">
                     {entry.target_cities.join(", ")}
                   </p>
@@ -253,7 +253,7 @@ export default function AdminWaitlistPage() {
                     onClick={() => approveEntry(selectedEntry.id)}
                     className="w-full bg-green-600 text-white rounded-md px-4 py-3 font-medium hover:bg-green-700"
                   >
-                    Approve & Send Email with Referral Link
+                    Approve &amp; Send Email with Referral Link
                   </button>
                 </div>
               )}

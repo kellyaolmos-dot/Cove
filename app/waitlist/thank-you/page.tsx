@@ -41,7 +41,7 @@ function ThankYouContent() {
         {type === "demand" && selectedCities.length > 0 ? (
           <div className="space-y-4">
             <p className="text-base text-gray-600">
-              We've received your application for{" "}
+              We&apos;ve received your application for{" "}
               <span className="font-medium text-gray-900">{selectedCities.join(", ")}</span>.
             </p>
             <div className="max-w-2xl mx-auto p-6 bg-gray-50 rounded-lg border border-gray-200">
@@ -53,11 +53,11 @@ function ThankYouContent() {
                 </li>
                 <li className="flex gap-3">
                   <span className="font-semibold text-gray-900">2.</span>
-                  <span>Once approved, you'll receive an email with your exclusive referral link</span>
+                  <span>Once approved, you&apos;ll receive an email with your exclusive referral link</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="font-semibold text-gray-900">3.</span>
-                  <span>We'll keep you updated on verified housing options in your target cities</span>
+                  <span>We&apos;ll keep you updated on verified housing options in your target cities</span>
                 </li>
               </ol>
             </div>

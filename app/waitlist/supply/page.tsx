@@ -11,18 +11,9 @@ const supplySchema = z.object({
   email: z.string().email(),
   address: z.string().min(3, "Provide a street or building name."),
   city: z.string().min(2, "City is required."),
-  rent: z
-    .string()
-    .optional()
-    .transform((val) => (val ? Number(val) : undefined)),
-  rooms: z
-    .string()
-    .optional()
-    .transform((val) => (val ? Number(val) : undefined)),
-  listing_link: z
-    .string()
-    .optional()
-    .transform((val) => (val ? val : undefined)),
+  rent: z.string().optional().or(z.literal("")),
+  rooms: z.string().optional().or(z.literal("")),
+  listing_link: z.string().optional().or(z.literal("")),
   willing_to_verify: z.boolean(),
 });
 
